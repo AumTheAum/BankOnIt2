@@ -12,7 +12,10 @@ public class Bank implements HasMenu {
 
 	public Bank(){
 		this.loadSampleCustomers();
+		this.saveCustomers();
+		this.loadCustomers();
 		this.start();
+		this.saveCustomers();
 	}
 
 	public String menu(){
@@ -41,6 +44,7 @@ public class Bank implements HasMenu {
 				}
 			} else if (response.equals("2")){
 				System.out.println("Costumer Login");
+				this.loginAsCustomer();
 			} else {
 				System.out.println("Please enter 0, 1, or 2");
 			}
@@ -58,8 +62,10 @@ public class Bank implements HasMenu {
 				this.reportAllCustomers();
 			} else if (response.equals("2")){
 				System.out.println("Add a User");
+				this.addUser();
 			} else if (response.equals("3")){
 				System.out.println("Apply Interest to Savings");
+				this.applyInterest();
 			}
 		}
 	}
@@ -75,6 +81,66 @@ public class Bank implements HasMenu {
 	public void reportAllCustomers(){
 		for (Customer customer: customers){
 			System.out.println(customer.getReport());
+		}
+	}
+
+	public void addUser(){
+		Scanner input = new Scanner(System.in);
+		System.out.print("Username: ");
+		String userName = input.nextLine();
+		System.out.print("PIN: ");
+		String PIN = input.nextLine();
+		customers.add(new Customer(userName, PIN));
+}
+
+	public void applyInterest(){
+		for(Customer customer: customers){
+			customer.savings.calcInterest();
+		}
+	}
+
+	public void loginAsCustomer(){
+		Scanner input = new Scanner(System.in);
+                System.out.print("Username: ");
+                String userNameIn =  input.nextLine();
+                System.out.print("PIN: ");
+                String PINin = input.nextLine();
+
+		Customer currentCustomer = null;
+		for (Customer customer: customers){
+			if (customer.login(userNameIn, PINin)){
+				currentCustomer = customer;
+			}
+		}
+
+		if (currentCustomer == null){
+			System.out.println("Customer not found");
+		} else {
+			currentCustomer.start();
+		}
+	}
+
+	public void saveCustomers(){
+		try {
+			FileOutputStream fo = new FileOutputStream("Customers.dat");
+			ObjectOutputStream obOut = new ObjectOutputStream(fo);
+			obOut.writeObject(customers);
+			obOut.close();
+		} catch (Exception e){
+			System.out.println(e.getMessage());
+		}
+
+	}
+
+	public void loadCustomers(){
+		try {
+			FileInputStream fi = new FileInputStream("Customers.dat");
+			ObjectInputStream obIn = new ObjectInputStream(fi);
+			customers = (CustomerList)obIn.readObject();
+			obIn.close();
+			fi.close();
+		} catch (Exception e){
+			System.out.println(e.getMessage());
 		}
 	}
 
